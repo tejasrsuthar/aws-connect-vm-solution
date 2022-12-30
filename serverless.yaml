@@ -7,5 +7,5 @@ provider:
   runtime: nodejs14.x
 
 functions:
-  hello:
-    handler: handler.hello
+  kvsTranscriber:
+    handler: functions/kvsTranscriber/build/index.handler
