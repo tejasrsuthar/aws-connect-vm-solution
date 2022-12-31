@@ -9,15 +9,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.handler = void 0;
-const handler = (event, context) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(`Event: ${JSON.stringify(event, null, 2)}`);
-    console.log(`Context: ${JSON.stringify(context, null, 2)}`);
+exports.hello = void 0;
+`use strict`;
+const uuid_1 = require("uuid");
+const hello = (event) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log('testevent:', (0, uuid_1.v4)());
     return {
         statusCode: 200,
         body: JSON.stringify({
-            message: 'hello world',
-        }),
+            message: (0, uuid_1.v4)(),
+            input: event,
+        }, null, 2),
     };
+    // Use this code if you don't use the http event with the LAMBDA-PROXY integration
+    // return { message: 'Go Serverless v1.0! Your function executed successfully!', event };
 });
-exports.handler = handler;
+exports.hello = hello;
+//# sourceMappingURL=handler.js.map
