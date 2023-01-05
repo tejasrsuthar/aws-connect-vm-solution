@@ -1,16 +1,13 @@
 `use strict`
 
-import { v4 as uuidv4 } from 'uuid';
+import color from '@mark-voicemail/common';
 
-export const hello = async (event) => {
-
-  console.log('testevent:', uuidv4());
-
+export const handler = async (event) => {
   return {
     statusCode: 200,
     body: JSON.stringify(
       {
-        message: uuidv4(),
+        message: color.red,
         input: event,
       },
       null,

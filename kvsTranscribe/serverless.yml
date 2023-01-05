@@ -1,0 +1,24 @@
+service: kvsTranscribe
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  # profile: mark-helsby-aws
+  profile: tejas-sa-iam
+
+layers:
+  clayer:
+    path: ../clayer
+    compatibleRuntimes:
+      - nodejs16.x
+    description: The main lambda layer that will have all the required dependencies
+
+functions:
+  kvsTranscribe:
+    handler: ./build/index.handler
+    name: vm-${sls:stage}-kvsTranscribe
+    description: Lambda that will source the stream
+    layers:
+      - !Ref ClayerLambdaLayer
+
