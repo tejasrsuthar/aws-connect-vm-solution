@@ -4,8 +4,8 @@ frameworkVersion: '3'
 provider:
   name: aws
   runtime: nodejs16.x
-  profile: mark-helsby-aws
-  # profile: tejas-sa-iam
+  # profile: mark-helsby-aws
+  profile: tejas-sa-iam
 
 
 resources: # CloudFormation template syntax from here on.
@@ -22,6 +22,6 @@ resources: # CloudFormation template syntax from here on.
             KeyType: HASH
         # assuming 5 concurrent calls    
         ProvisionedThroughput:
-          ReadCapacityUnits: 5
-          WriteCapacityUnits: 5
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
 
