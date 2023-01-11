@@ -1,11 +1,10 @@
 service: kvsTrigger
-frameworkVersion: '3'
+frameworkVersion: "3"
 
 provider:
   name: aws
   runtime: nodejs16.x
-  # profile: mark-helsby-aws
-  profile: tejas-sa-iam
+  profile: mark-helsby-aws
 
 layers:
   clayer:
@@ -19,6 +18,9 @@ functions:
     handler: ./build/index.handler
     name: vm-${sls:stage}-kvsTrigger
     description: Lambda that will source the stream
+    timeout: 300
     layers:
       - !Ref ClayerLambdaLayer
-
+    environment:
+      TBL_CONTACT_DETAILS: vmContactDetails
+      REGION: ap-southeast-2

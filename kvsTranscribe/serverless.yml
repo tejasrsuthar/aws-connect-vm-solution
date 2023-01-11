@@ -1,11 +1,11 @@
 service: kvsTranscribe
-frameworkVersion: '3'
+frameworkVersion: "3"
 
 provider:
   name: aws
   runtime: nodejs16.x
-  # profile: mark-helsby-aws
-  profile: tejas-sa-iam
+  profile: mark-helsby-aws
+  # profile: tejas-sa-iam
 
 layers:
   clayer:
@@ -21,4 +21,3 @@ functions:
     description: Lambda that will source the stream
     layers:
       - !Ref ClayerLambdaLayer
-
