@@ -1,11 +1,35 @@
 service: kvsTranscribe
 frameworkVersion: "3"
 
+custom:
+  region: ap-southeast-2
+  awsAccountId: 784257149581
+  resourcePrefix: vm
+
 provider:
   name: aws
   runtime: nodejs16.x
   profile: mark-helsby-aws
-  # profile: tejas-sa-iam
+
+  # IAM Role statements will be attached to the lambda execution role
+  iam:
+    role:
+      statements:
+        # Allow lambda to start transcription job
+        - Effect: Allow
+          Action:
+            - "transcribe:StartTranscriptionJob"
+          Resource:
+            - arn:aws:transcribe:${self:custom.region}:${self:custom.awsAccountId}:transcription-job/*
+
+        # Allow lambda to write objects in a bucket
+        - Effect: Allow
+          Action:
+            - s3:PutObject
+            - s3:GetObject
+          Resource:
+            - arn:aws:s3:::${self:custom.resourcePrefix}-voicemail-transcriptions/*
+            - arn:aws:s3:::${self:custom.resourcePrefix}-voicemail-recordings/*
 
 layers:
   clayer:
@@ -17,7 +41,11 @@ layers:
 functions:
   kvsTranscribe:
     handler: ./build/index.handler
-    name: vm-${sls:stage}-kvsTranscribe
-    description: Lambda that will source the stream
+    name: ${self:custom.resourcePrefix}-${sls:stage}-kvsTranscribe
+    description: Lambda that will transcribe the audio file
+    timeout: 500
     layers:
       - !Ref ClayerLambdaLayer
+    environment:
+      TBL_CONTACT_DETAILS: ${self:custom.resourcePrefix}ContactDetails
+      REGION: ${self:custom.region}

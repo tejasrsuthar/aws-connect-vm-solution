@@ -1,7 +1,6 @@
 {
   "dependencies": {
-    "@aws-sdk/client-transcribe": "^3.245.0",
-    "@mark-voicemail/common": "^1.0.31",
+    "@mark-voicemail/common": "^1.0.38",
     "@types/aws-lambda": "^8.10.109",
     "@types/node": "^18.11.18",
     "aws-lambda": "^1.0.7",

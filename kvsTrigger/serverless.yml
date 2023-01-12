@@ -1,10 +1,54 @@
 service: kvsTrigger
 frameworkVersion: "3"
 
+custom:
+  region: ap-southeast-2
+  awsAccountId: 784257149581
+  resourcePrefix: vm
+
 provider:
   name: aws
   runtime: nodejs16.x
   profile: mark-helsby-aws
+
+  # IAM Role statements will be attached to the lambda execution role
+  iam:
+    role:
+      statements:
+        # Allow lambda to access ddb table
+        - Effect: Allow
+          Action:
+            - dynamodb:DescribeTable
+            - dynamodb:DeleteTable
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:Query
+          Resource:
+            - arn:aws:dynamodb:${self:custom.region}:${self:custom.awsAccountId}:table/${self:custom.resourcePrefix}ContactDetails
+
+        # Allow lambda to write objects in a bucket
+        - Effect: Allow
+          Action:
+            - s3:PutObject
+            - s3:GetObject
+          Resource:
+            - arn:aws:s3:::${self:custom.resourcePrefix}-voicemail-recordings/*
+
+        # Allow lambda function to invoke another lambda function
+        - Effect: Allow
+          Action:
+            - lambda:InvokeFunction
+            - lambda:InvokeAsync
+          Resource:
+            - arn:aws:lambda:${self:custom.region}:${self:custom.awsAccountId}:function:${self:custom.resourcePrefix}-dev-kvsTranscribe
+
+        # Allow lambda function to process kinesis video strem
+        - Effect: Allow
+          Action:
+            - kinesisvideo:*
+          Resource:
+            - "*"
 
 layers:
   clayer:
@@ -16,11 +60,12 @@ layers:
 functions:
   kvsTrigger:
     handler: ./build/index.handler
-    name: vm-${sls:stage}-kvsTrigger
+    name: ${self:custom.resourcePrefix}-${sls:stage}-kvsTrigger
     description: Lambda that will source the stream
     timeout: 300
     layers:
       - !Ref ClayerLambdaLayer
     environment:
-      TBL_CONTACT_DETAILS: vmContactDetails
-      REGION: ap-southeast-2
+      TBL_CONTACT_DETAILS: ${self:custom.resourcePrefix}ContactDetails
+      TRANSCRIBE_LAMBDA_ARN: arn:aws:lambda:${self:custom.region}:${self:custom.awsAccountId}:function:${self:custom.resourcePrefix}-dev-kvsTranscribe
+      REGION: ${self:custom.region}

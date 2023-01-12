@@ -1,40 +1,20 @@
 
 import { inspect } from 'util';
-import { get, omit } from 'lodash';
+import { get } from 'lodash';
 import { APIGatewayProxyResult, APIGatewayEvent } from 'aws-lambda';
 
-import { ConnectVoiceMail } from './connectVoicemail';
 import {
-  consoleLogger as Logger, ContactDetailsModel,
-  updateDDBAudioCompletedEntry, updateDDBInitialContactEntry,
-  S3
+  consoleLogger as Logger,
+  S3,
+  transcribeService,
+  contactDetailsService,
+  Voicemail,
+  lambdaService,
 } from '@mark-voicemail/common';
 
 const region = process.env.REGION || 'ap-southeast-2';
 const recordingsBucket = 'vm-voicemail-recordings';
-
-// Import the required AWS SDK clients and commands for Node.js
-import { StartTranscriptionJobCommand } from "@aws-sdk/client-transcribe";
-
-
-// const dateString = (date: Date) => {
-//   const year = date.getFullYear();
-//   const mon = (date.getMonth() + 1);
-//   const day = date.getDate();
-//   const hour = date.getHours();
-//   const min = date.getMinutes();
-
-//   const space = (n: number) => {
-//     return ('0' + (n)).slice(-2)
-//   }
-
-//   let result = year + '-';
-//   result += space(mon) + '-';
-//   result += space(day) + '_';
-//   result += space(hour) + ':';
-//   result += space(min);
-//   return result;
-// }
+const transcriptionBucket = 'vm-voicemail-transcriptions';
 
 const processVideo = async (event: APIGatewayEvent): Promise<{ status: boolean, error: any }> => {
   try {
@@ -47,7 +27,7 @@ const processVideo = async (event: APIGatewayEvent): Promise<{ status: boolean, 
     Logger.info('streamName:' + streamName);
     Logger.info('fragmentNumber:' + fragmentNumber);
 
-    const connectVoiceMail = new ConnectVoiceMail();
+    const connectVoiceMail = new Voicemail.ConnectVoiceMail();
     const wav = await connectVoiceMail.getWav(region, streamName, fragmentNumber);
 
     const key = `${contactId}/audio.wav`;
@@ -71,7 +51,7 @@ export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyRe
   /**
    * Initial DB entry for the contact
    */
-  await updateDDBInitialContactEntry(event);
+  await contactDetailsService.updateDDBInitialContactEntry(event);
   Logger.info('---- DB Initial Entry Update completed ------');
 
   /**
@@ -87,38 +67,22 @@ export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyRe
   /**
    * Update db entry for the contact Id
    */
-  await updateDDBAudioCompletedEntry(event);
+  await contactDetailsService.updateDDBAudioCompletedEntry(event);
   Logger.info('---- Audio Processing DB entry completed ------');
 
-  // Invoke Transcribe Lambda further 
+  // Invoke Transcribe Lambda further for transcription
   // --------------------------------------------------------------
-
-  const { TranscribeClient } = require("@aws-sdk/client-transcribe");
-  const transcribeClient = new TranscribeClient({ region });
-
   const contactId = get(event, 'Details.ContactData.ContactId');
   const fileName = 'audio.wav';
   const wavFile = `https://${recordingsBucket}.s3-${region}.amazonaws.com/${contactId}/${fileName}`;
 
-  const params = {
-    TranscriptionJobName: `transcript-${contactId}`,
-    LanguageCode: "en-US",
-    MediaFormat: "wav",
-    Media: {
-      MediaFileUri: wavFile,
-    },
-    OutputBucketName: recordingsBucket
+  const invokeLambdaParams = {
+    FunctionName: process.env.TRANSCRIBE_LAMBDA_ARN,
+    InvocationType: 'Event',
+    Payload: JSON.stringify({ contactId, wavFile, transcriptionBucket })
   };
 
-  try {
-    const data = await transcribeClient.send(
-      new StartTranscriptionJobCommand(params)
-    );
-    console.log("Success - put", data);
-    return data;
-  } catch (err) {
-    console.log("Error", err);
-  }
+  await lambdaService.invokeLambda(invokeLambdaParams);
 
   return {
     statusCode: 200

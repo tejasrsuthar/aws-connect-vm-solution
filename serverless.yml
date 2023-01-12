@@ -1,12 +1,11 @@
-service: kvsTranscribe
-frameworkVersion: '3'
+service: kvsTranscribeTable
+frameworkVersion: "3"
 
 provider:
   name: aws
   runtime: nodejs16.x
   # profile: mark-helsby-aws
   profile: tejas-sa-iam
-
 
 resources: # CloudFormation template syntax from here on.
   Resources:
@@ -20,8 +19,7 @@ resources: # CloudFormation template syntax from here on.
         KeySchema:
           - AttributeName: contactId
             KeyType: HASH
-        # assuming 5 concurrent calls    
+        # assuming 5 concurrent calls
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-

@@ -6,12 +6,7 @@ import { APIGatewayProxyResult, APIGatewayEvent } from 'aws-lambda';
 
 export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
   try {
-    // Logger.info('Incoming Event: ', JSON.stringify(event, null, 2));
-    Logger.info('incoming event type', event);
-    const { contactId, wavFile, transcriptionBucket } = event;
-
-    // Start transcription process
-    await transcribeService.startTranscriptionJob(contactId, wavFile, transcriptionBucket);
+    Logger.log('Incoming Event: ', JSON.stringify(event, null, 2));
 
     return {
       statusCode: 200,

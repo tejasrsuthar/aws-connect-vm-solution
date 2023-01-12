@@ -1,0 +1,26 @@
+service: processVoicemail
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  profile: mark-helsby-aws
+
+layers:
+  clayer:
+    path: ../clayer
+    compatibleRuntimes:
+      - nodejs16.x
+    description: The main lambda layer that will have all the required dependencies
+
+functions:
+  kvsTranscribe:
+    handler: ./build/index.handler
+    name: vm-${sls:stage}-processVoicemail
+    description: Lambda that will update the db entries and send email to client for voicemail
+    timeout: 500
+    layers:
+      - !Ref ClayerLambdaLayer
+    environment:
+      TBL_CONTACT_DETAILS: vmContactDetails
+      REGION: ap-southeast-2
