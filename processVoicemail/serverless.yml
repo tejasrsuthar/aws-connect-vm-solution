@@ -1,10 +1,52 @@
 service: processVoicemail
 frameworkVersion: "3"
 
+custom:
+  region: ap-southeast-2
+  awsAccountId: 784257149581
+  resourcePrefix: vm
+  sesFromEmail: voicemail@dyrees.com
+  sesToEmail: tejact2007@gmail.com
+  timezone: Australia/Sydney
+
 provider:
   name: aws
+  region: ${self:custom.region}
   runtime: nodejs16.x
   profile: mark-helsby-aws
+
+  # IAM Role statements will be attached to the lambda execution role
+  iam:
+    role:
+      statements:
+        # Allow lambda to access ddb table
+        - Effect: Allow
+          Action:
+            - dynamodb:DescribeTable
+            - dynamodb:DeleteTable
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:Query
+          Resource:
+            - arn:aws:dynamodb:${self:custom.region}:${self:custom.awsAccountId}:table/${self:custom.resourcePrefix}ContactDetails
+
+        # Allow lambda to write objects in a bucket
+        - Effect: Allow
+          Action:
+            - s3:PutObject
+            - s3:GetObject
+            - s3:CopyObject
+            - s3:DeleteObject
+          Resource:
+            - arn:aws:s3:::${self:custom.resourcePrefix}-voicemail-recordings/*
+            - arn:aws:s3:::${self:custom.resourcePrefix}-voicemail-transcriptions/*
+        # Allow lambda to send email
+        - Effect: Allow
+          Action:
+            - ses:SendRawEmail
+          Resource:
+            - "*"
 
 layers:
   clayer:
@@ -14,13 +56,27 @@ layers:
     description: The main lambda layer that will have all the required dependencies
 
 functions:
-  kvsTranscribe:
+  processVoicemail:
     handler: ./build/index.handler
-    name: vm-${sls:stage}-processVoicemail
+    name: ${self:custom.resourcePrefix}-${sls:stage}-processVoicemail
     description: Lambda that will update the db entries and send email to client for voicemail
     timeout: 500
+    events:
+      - s3:
+          bucket: ${self:custom.resourcePrefix}-voicemail-transcriptions
+          event: s3:ObjectCreated:*
+          rules:
+            - suffix: .json
+          existing: true
+          forceDeploy: true
+
     layers:
       - !Ref ClayerLambdaLayer
     environment:
-      TBL_CONTACT_DETAILS: vmContactDetails
-      REGION: ap-southeast-2
+      TBL_CONTACT_DETAILS: ${self:custom.resourcePrefix}ContactDetails
+      REGION: ${self:custom.region}
+      BKT_RECORDINGS: ${self:custom.resourcePrefix}-voicemail-recordings
+      BKT_TRANSCRIPTIONS: ${self:custom.resourcePrefix}-voicemail-transcriptions
+      SES_EMAIL_FROM: ${self:custom.sesFromEmail}
+      SES_EMAIL_TO: ${self:custom.sesToEmail}
+      TZ: ${self:custom.timezone}

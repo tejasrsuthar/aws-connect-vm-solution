@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@mark-voicemail/common": "^1.0.38",
+    "@mark-voicemail/common": "^1.0.67",
     "@types/aws-lambda": "^8.10.109",
     "@types/node": "^18.11.18",
     "aws-lambda": "^1.0.7",

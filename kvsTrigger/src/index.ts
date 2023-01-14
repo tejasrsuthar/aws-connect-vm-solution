@@ -6,7 +6,6 @@ import { APIGatewayProxyResult, APIGatewayEvent } from 'aws-lambda';
 import {
   consoleLogger as Logger,
   S3,
-  transcribeService,
   contactDetailsService,
   Voicemail,
   lambdaService,
