@@ -6,7 +6,7 @@ custom:
   awsAccountId: 784257149581
   resourcePrefix: vm
   sesFromEmail: voicemail@dyrees.com
-  sesToEmail: tejact2007@gmail.com
+  sesToDefaultEmail: tejact2007@gmail.com
   timezone: Australia/Sydney
 
 provider:
@@ -78,5 +78,5 @@ functions:
       BKT_RECORDINGS: ${self:custom.resourcePrefix}-voicemail-recordings
       BKT_TRANSCRIPTIONS: ${self:custom.resourcePrefix}-voicemail-transcriptions
       SES_EMAIL_FROM: ${self:custom.sesFromEmail}
-      SES_EMAIL_TO: ${self:custom.sesToEmail}
+      SES_DEFAULT_EMAIL_TO: ${self:custom.sesToDefaultEmail}
       TZ: ${self:custom.timezone}

@@ -10,6 +10,7 @@ provider:
   name: aws
   runtime: nodejs16.x
   profile: mark-helsby-aws
+  region: ${self:custom.region}
 
   # IAM Role statements will be attached to the lambda execution role
   iam:

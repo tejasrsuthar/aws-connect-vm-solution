@@ -90,19 +90,22 @@ export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyRe
         const contactDetails = await contactDetailsService.getContactDetails(contactId);
 
         console.log('contactDetails', contactDetails);
-        const { customerPhoneNumber } = contactDetails;
+        const { customerPhoneNumber, customerName, branchEmail } = contactDetails;
 
         const mailParams = {
           from: process.env.SES_EMAIL_FROM,
-          to: split(process.env.SES_EMAIL_TO, ','),
-          subject: `New Voicemail from ${customerPhoneNumber} {CustomerName}`,
+          to: branchEmail || split(process.env.SES_DEFAULT_EMAIL_TO, ','),
+          subject: `New Voicemail from ${customerPhoneNumber} ${customerName}`,
           template: 'voicemail',
           context: {
-            voicemailClientName: 'Tejas',
+            voicemailClientName: customerName,
             voicemailTranscript: transcript,
-            voicemailLink: voicemailUrl
+            voicemailLink: voicemailUrl,
+            customerName
           }
         };
+
+        Logger.info('mailParams', mailParams);
         const { status } = await sendEmail(mailParams);
 
         if (status) {
