@@ -85,8 +85,10 @@ export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyRe
         const transcript = await getTranscript(contactId);
         const voicemailUrl = await S3.getSignedUrl(recordingsBucket, `${contactId}/${VOICEMAIL_FILE}`, DAYS_3_IN_SECONDS);
 
+        const signedUrlbase64 = Buffer.from(voicemailUrl, 'utf8').toString('base64');
+        const playerURL = `${process.env.VOICEMAIL_PLAYER_URL}?plid=${signedUrlbase64}`;
+
         Logger.info(`---- voicemailUrl: ${voicemailUrl}`);
-        // voicemailClientName
         const contactDetails = await contactDetailsService.getContactDetails(contactId);
 
         console.log('contactDetails', contactDetails);
@@ -100,7 +102,7 @@ export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyRe
           context: {
             voicemailClientName: customerName,
             voicemailTranscript: transcript,
-            voicemailLink: voicemailUrl,
+            voicemailLink: playerURL,
             customerName
           }
         };

@@ -80,3 +80,4 @@ functions:
       SES_EMAIL_FROM: ${self:custom.sesFromEmail}
       SES_DEFAULT_EMAIL_TO: ${self:custom.sesToDefaultEmail}
       TZ: ${self:custom.timezone}
+      VOICEMAIL_PLAYER_URL: https://voicemail-player.s3.${self:custom.region}.amazonaws.com/index.html

@@ -2,6 +2,7 @@
 import { inspect } from 'util';
 import { get } from 'lodash';
 import { APIGatewayProxyResult, APIGatewayEvent } from 'aws-lambda';
+import fs from 'fs';
 
 import {
   consoleLogger as Logger,
@@ -30,12 +31,15 @@ const processVideo = async (event: APIGatewayEvent): Promise<{ status: boolean, 
     const wav = await connectVoiceMail.getWav(region, streamName, fragmentNumber);
 
     const key = `${contactId}/audio.wav`;
+    const mp3Key = `${contactId}/audio.mp3`;
     Logger.info('---- wavFile Generagted ------',);
 
+    // store wav file to S3
     const putObjectResult = await S3.putFile(recordingsBucket, key, Buffer.from(wav.buffer));
     Logger.info('---- wavFile Pushed to S3 ------',);
 
     Logger.info('putObjectResult', putObjectResult);
+    // Logger.info('putObjectMP3Result', putObjectMP3Result);
     return { status: true, error: null };
 
   } catch (error) {
@@ -45,7 +49,7 @@ const processVideo = async (event: APIGatewayEvent): Promise<{ status: boolean, 
 }
 
 export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
-  Logger.info(inspect(event, { depth: null }));
+  Logger.info(event);
 
   /**
    * Initial DB entry for the contact
