@@ -10,6 +10,7 @@ provider:
   name: aws
   runtime: nodejs16.x
   profile: mark-helsby-aws
+  region: ${self:custom.region}
 
   # IAM Role statements will be attached to the lambda execution role
   iam:
@@ -30,6 +31,30 @@ provider:
           Resource:
             - arn:aws:s3:::${self:custom.resourcePrefix}-voicemail-transcriptions/*
             - arn:aws:s3:::${self:custom.resourcePrefix}-voicemail-recordings/*
+        # Allow lambda function to process kinesis video strem
+        - Effect: Allow
+          Action:
+            - kinesisvideo:*
+          Resource:
+            - "*"
+        # Allow lambda to write objects in a bucket
+        - Effect: Allow
+          Action:
+            - s3:PutObject
+            - s3:GetObject
+          Resource:
+            - arn:aws:s3:::${self:custom.resourcePrefix}-voicemail-recordings/*
+        # Allow lambda to access ddb table
+        - Effect: Allow
+          Action:
+            - dynamodb:DescribeTable
+            - dynamodb:DeleteTable
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:Query
+          Resource:
+            - arn:aws:dynamodb:${self:custom.region}:${self:custom.awsAccountId}:table/${self:custom.resourcePrefix}ContactDetails
 
 layers:
   clayer:
@@ -42,10 +67,12 @@ functions:
   kvsTranscribe:
     handler: ./build/index.handler
     name: ${self:custom.resourcePrefix}-${sls:stage}-kvsTranscribe
-    description: Lambda that will transcribe the audio file
+    description: Lambda that will generate wav file and transcribe it to text
     timeout: 500
     layers:
       - !Ref ClayerLambdaLayer
     environment:
-      TBL_CONTACT_DETAILS: ${self:custom.resourcePrefix}ContactDetails
       REGION: ${self:custom.region}
+      TBL_CONTACT_DETAILS: ${self:custom.resourcePrefix}ContactDetails
+      TRANSCRIPTIONS_BUCKET: vm-voicemail-transcriptions
+      RECORDINGS_BUCKET: vm-voicemail-recordings
