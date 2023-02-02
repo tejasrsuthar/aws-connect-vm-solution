@@ -8,7 +8,7 @@ import { get, split } from 'lodash';
 import { APIGatewayProxyResult, APIGatewayEvent } from 'aws-lambda';
 
 const recordingsBucket = process.env.BKT_RECORDINGS;
-const DAYS_3_IN_SECONDS = 259200;
+const DAYS_7_IN_SECONDS = 604800;
 const VOICEMAIL_FILE = 'audio.wav';
 const TRANSCRIPT_FILE = 'transcript.json';
 
@@ -83,7 +83,7 @@ export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyRe
         Logger.info('------ Transcription source file deleted -----');
 
         const transcript = await getTranscript(contactId);
-        const voicemailUrl = await S3.getSignedUrl(recordingsBucket, `${contactId}/${VOICEMAIL_FILE}`, DAYS_3_IN_SECONDS);
+        const voicemailUrl = await S3.getSignedUrl(recordingsBucket, `${contactId}/${VOICEMAIL_FILE}`, DAYS_7_IN_SECONDS);
 
         const signedUrlbase64 = Buffer.from(voicemailUrl, 'utf8').toString('base64');
         const playerURL = `${process.env.VOICEMAIL_PLAYER_URL}?plid=${signedUrlbase64}`;
