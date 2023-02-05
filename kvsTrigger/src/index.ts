@@ -1,7 +1,6 @@
 import { APIGatewayProxyResult, APIGatewayEvent } from 'aws-lambda';
 
 import {
-  consoleLogger as Logger,
   contactDetailsService,
   lambdaService,
 } from '@mark-voicemail/common';
@@ -10,10 +9,11 @@ let response;
 
 export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
   try {
-    Logger.info(event);
+
+    console.info(event);
 
     await contactDetailsService.updateDDBInitialContactEntry(event);
-    Logger.info('---- DB Initial Entry Update completed ------');
+    console.info('---- DB Initial Entry Update completed ------');
 
     const invokeLambdaParams = {
       FunctionName: process.env.TRANSCRIBE_LAMBDA_ARN,
@@ -33,5 +33,4 @@ export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyRe
   };
 
   return response;
-
 };
