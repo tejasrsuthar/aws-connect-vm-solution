@@ -85,11 +85,18 @@ export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyRe
         console.info('------ Transcription source file deleted -----');
 
         const transcript = await getTranscript(contactId);
-        const s3Client = new S3Client({ region: process.env.REGION });
+        const s3Client = new S3Client({
+          credentials: {
+            accessKeyId: process.env.USER_AWS_ACCESS_KEY_ID || '',
+            secretAccessKey: process.env.USER_AWS_SECRET_ACCESS_KEY || '',
+          },
+          region: process.env.REGION
+        });
+
         const signer = new S3Signer({ s3Client, getSignedUrl });
         const signerResponse = await signer.sign({ bucket: recordingsBucket, key: `${contactId}/${VOICEMAIL_FILE}`, expiresSec: SIGN_URL_EXPIRATION_SEC });
 
-        console.log('handler:signerResponse', signerResponse);        
+        console.log('handler:signerResponse', signerResponse);
         const voicemailUrl = signerResponse.preSignedUrl;
 
         const signedUrlbase64 = Buffer.from(voicemailUrl, 'utf8').toString('base64');

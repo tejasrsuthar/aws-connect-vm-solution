@@ -8,6 +8,7 @@ custom:
   sesFromEmail: voicemail@dyrees.com
   sesToDefaultEmail: tejact2007@gmail.com
   timezone: Australia/Sydney
+  awsCreds: ${ssm:/aws/reference/secretsmanager/dev/aws-creds}
 
 provider:
   name: aws
@@ -81,4 +82,6 @@ functions:
       SES_DEFAULT_EMAIL_TO: ${self:custom.sesToDefaultEmail}
       TZ: ${self:custom.timezone}
       SIGN_URL_EXPIRATION_SEC: 604800
+      USER_AWS_ACCESS_KEY_ID: ${self:custom.awsCreds.AWS_ACCESS_KEY_ID}
+      USER_AWS_SECRET_ACCESS_KEY: ${self:custom.awsCreds.AWS_SECRET_ACCESS_KEY}
       VOICEMAIL_PLAYER_URL: https://voicemail-player.s3.${self:custom.region}.amazonaws.com/index.html

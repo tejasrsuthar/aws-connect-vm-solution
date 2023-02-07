@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@mark-voicemail/common": "^1.0.116",
+    "@mark-voicemail/common": "^1.0.117",
     "aws-lambda": "^1.0.7",
     "lodash": "^4.17.21",
     "uuid": "^8.0.0"

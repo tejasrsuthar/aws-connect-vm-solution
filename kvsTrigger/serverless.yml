@@ -35,6 +35,23 @@ provider:
             - lambda:InvokeAsync
           Resource:
             - arn:aws:lambda:${self:custom.region}:${self:custom.awsAccountId}:function:${self:custom.resourcePrefix}-dev-kvsTranscribe
+        
+        # allow lambda to access the stream
+        - Effect: Allow
+          Action:
+           - kinesis:GetMedia
+           - kinesis:GetRecords
+           - kinesis:GetShardIterator
+           - kinesis:DescribeStream
+           - kinesis:ListStreams
+          Resource: arn:aws:kinesis:${self:custom.region}:${self:custom.awsAccountId}:stream/vm-stream
+          
+        # Allow lambda to access the video
+        - Effect: Allow
+          Action: 
+            - kinesisvideo:GetMedia
+            - kinesisvideo:GetDataEndpoint
+          Resource: "*"
 
 layers:
   clayer:
@@ -49,6 +66,11 @@ functions:
     name: ${self:custom.resourcePrefix}-${sls:stage}-kvsTrigger
     description: Lambda that will source the stream
     timeout: 300
+    events:
+      - stream:
+          type: kinesis
+          arn: arn:aws:kinesis:${self:custom.region}:${self:custom.awsAccountId}:stream/vm-stream
+          batchWindow: 1
     layers:
       - !Ref ClayerLambdaLayer
     environment:
