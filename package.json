@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.264.0",
+    "@aws-sdk/s3-request-presigner": "^3.264.0",
+    "@aws-sdk/types": "^3.257.0",
+    "@mark-voicemail/common": "^1.0.108",
+    "@types/aws-lambda": "^8.10.110"
+  }
+}

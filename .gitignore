@@ -5,6 +5,4 @@ build
 # Serverless directories
 .serverless
 
-# exclude common repository to this root commit, it will be pushed separately
-common
 .vscode
