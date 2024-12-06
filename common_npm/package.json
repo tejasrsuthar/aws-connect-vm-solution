@@ -1,0 +1,46 @@
+{
+  "name": "@mark-voicemail/common",
+  "version": "1.0.108",
+  "description": "",
+  "main": "./build/index.js",
+  "types": "./build/index.d.ts",
+  "files": [
+    "build/**/*"
+  ],
+  "scripts": {
+    "clean": "del-cli ./build/*",
+    "build": "npm run clean && tsc",
+    "copyfiles": "cp -r src/views/ build",
+    "pub": "git add . && git commit -m \"Updates\" && npm version patch && npm run build || npm run copyfiles && npm publish"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@aws-sdk/types": "^3.226.0",
+    "@types/lodash": "^4.14.191",
+    "@types/node": "^18.11.18",
+    "del-cli": "^5.0.0",
+    "typescript": "^4.9.4"
+  },
+  "dependencies": {
+    "@aws-sdk/client-lambda": "^3.264.0",
+    "@aws-sdk/client-s3": "^3.264.0",
+    "@aws-sdk/client-ses": "^3.245.0",
+    "@aws-sdk/client-transcribe": "^3.245.0",
+    "@aws-sdk/credential-provider-node": "^3.241.0",
+    "@aws-sdk/s3-request-presigner": "^3.264.0",
+    "@types/aws-lambda": "^8.10.109",
+    "aws-lambda": "^1.0.7",
+    "aws-sdk": "^2.1288.0",
+    "dayjs": "^1.11.7",
+    "dynamoose": "^3.1.0",
+    "ebml": "^3.0.0",
+    "lambda-audio": "^1.0.0",
+    "lodash": "^4.17.21",
+    "mime-types": "^2.1.35",
+    "nodemailer": "^6.9.0",
+    "nodemailer-express-handlebars": "^6.0.0",
+    "winston": "^3.8.2"
+  }
+}
